@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>info Korea - keyword search</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!-- facebook -->
+    <meta property="fb:app_id" content="394068590973816" />
+    <meta id="facebookTITLE" property="og:title" content="infoKorea"/>
+    <meta id="facebookURL" property="og:url" content="http://ing9321.dothome.co.kr/infoKorea_detail.html"/>
+    <meta id="facebookDEC" property="og:description" content="Welcome to Korea"/>
+    <meta id="facebookIMG" property="og:image" content="http://ing9321.dothome.co.kr/img/shareThumbnail.jpg"/>
+    <meta property="og:type" content="website" />
+    <meta property="og:image:width" content="600" />
+	<meta property="og:image:height" content="315" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link href="css/infoKorea_keywordSearch.css" rel="stylesheet">
+    <link rel="shortcut icon" href="img/destination.png">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+//        myFunction();
+        
+        // 다음 페이지를 위한 변수
+        page = 1;
+        totalPage = 0;
+        flagMore = false;
+        prevNext = 0;
+        
+        apiKey = "qLl4v2edNeIFrjzZ3if3bfSoVYcUJ5Z8FtLMUHe6MQL%2FkFm80qBklM08mO8t0q%2Fk2l9Pb2d4GEoAtr5XL72IYg%3D%3D";
+        language = getParameter('language');
+        url = "";
+        
+        function myFunction() {
+            $('#loading').css('display', 'block');
+            $('.wrapWidth').css('display', 'none');
+            setTimeout(function () {
+                $('#loading').css('display', 'none');
+            }, 2000);
+            setTimeout(function () {
+                $('.wrapWidth').css('display', 'block');
+            }, 2000);
+        }
+        
+        function getParameter(param) {
+            var value = '';
+            var url = location.href;
+            var parameter = (url.slice(url.indexOf('?') + 1, url.length)).split('&');
+            for(var i = 0; i < parameter.length; i++){
+                var name = parameter[i].split('=')[0];
+                if(name == param) {
+                    value = parameter[i].split('=')[1];
+                    break;
+                }
+            }
+            return value;
+        }
+        
+        $(document).ready(function () {
+            $('#logo').height($('#logo').width());
+            // 윈도우 너비에 따른 화면 조정
+            if(parseInt($(window).width()) < 801){
+                $('.wrapWidth').removeClass('wrap');
+                $('.containerWidth').removeClass('container');
+                $('.paging').css('display', 'none');
+                $('.bg-danger').css('font-size', '4vw');
+            }
+            $('#keyword').keyup(function (e) {
+                var code = e.which;
+                if(code==13){
+                    clickedSearch();
+                }
+            });
+            
+            $(window).resize(function () {
+                $('#logo').height($('#logo').width());
+                
+                if(parseInt($(window).width()) < 801){
+                    $('.wrapWidth').removeClass('wrap');
+                    $('.containerWidth').removeClass('container');
+                    $('.paging').css('display', 'none');
+                    $('.bg-danger').css('font-size', '4vw');
+                } else if(parseInt($(window).width()) > 800) {
+                    $('.wrapWidth').addClass('wrap');
+                    $('.containerWidth').addClass('container');
+                    $('.paging').css('display', 'block');
+                    $('.bg-danger').css('font-size', '1.5vw');
+                }
+            });
+            
+            // 네비게이션 버튼 클릭 이벤트
+            var btnFlag = false;
+            $('#menuBtn').click(function () {
+                if (!btnFlag) {
+                    $('#homeBtn').animate({
+                        bottom: '55px'
+                    }, 300);
+                    $('#likeBtn').animate({
+                        bottom: '105px'
+                    }, 300);
+                    $('#backBtn').animate({
+                        bottom: '155px'
+                    }, 300);
+                    btnFlag = true;
+                }
+                else {
+                    $('.navBtn').animate({
+                        bottom: '5px'
+                    }, 300);
+                    btnFlag = false;
+                }
+            });
+            $('#backBtn').click(function () {
+                window.history.back();
+            });
+            $('#likeBtn').click(function () {
+                window.location = "infoKorea_searchList.html?favorite=Y";
+            });
+            $('#homeBtn').click(function () {
+                window.location = "infoKorea_main.html";
+            });
+            
+            // 윈도우가 스크롤 됐을 때
+            $(window).scroll(function() {
+                if($(window).width() < 801){
+                    // 더보기가 참일 때
+                    if(flagMore){
+                        // 윈도우 스크롤 위치가 문서길이와 동일할 경우(스크롤이 맨 밑일 때)
+                        if($(window).scrollTop() == $(document).height() - $(window).height()) {
+                            // 전체 페이지 수보다 현재 페이지가 작으면
+                            if(page < totalPage) {
+                                // 다음 페이지 출력
+                                showMore(++page);
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        
+        function clickedSearch() {
+            // 검색 누를 때마다 초기화될 값
+            page = 1;
+            totalPage = 0;
+            flagMore = false;
+            prevNext = 0;
+            
+            var keyword = $('#keyword').val().trim();
+            
+            if(keyword != ''){
+                myFunction();
+                keyword = encodeURI(keyword); // 키워드 인코딩
+                url = "http://api.visitkorea.or.kr/openapi/service/rest/" + language + "/searchKeyword?ServiceKey=" + apiKey + "&keyword=" + keyword + "&_type=json&numOfRows=10&arrange=B&MobileOS=AND&MobileApp=appName&pageNo=";
+                $.ajax({
+                    url: url + page,
+                    type: 'get',
+                    jsonp: 'callback',
+                    success: function(data) {
+                        console.log(data);
+                        if(data.response.body.items == ""){
+                            $('.sightsList').html("<div class='sightsContainer' id='noItem'>No Result</div>");
+                            return false;
+                        }
+                        var items = data.response.body.items.item; // 관광지
+
+                        var total = data.response.body.totalCount; // 검색된 관광지 수
+                        totalPage = total / 10; // 검색된 관광지 리스트 페이지 수
+
+                        // 페이지만큼 데스크탑 버전 페이지란에 태그 삽입
+                        var pageTag = "<span class='pages' id='firstPage' onclick='toFirstLast(this);'><img src='img/toFirst.png'/></span>";
+                        // 페이지 수가 10보다 많으면 1부터 10까지 페이지만 출력
+                        pageTag += "<span class='pages' id='prevPage' onclick='tenthPaging(1);'><img src='img/prev.png'/></span>";
+                        
+                        for(var i = 0; i < totalPage; i++) {
+                            pageTag += "<span class='pages' id='p" + (i+1) + "' onclick='showPage(this);'>" + (i+1) + "</span>";
+                        }
+                        $('.paging').append(pageTag);
+                        // 다음 열개의 페이지 출력 버튼
+                        $('.paging').append("<span class='pages' id='nextPage' onclick='tenthPaging(2);'><img src='img/next.png'/></span><span class='pages' id='lastPage' onclick='toFirstLast(this);'><img src='img/toLast.png'/></span>");
+                        
+                        tenthPaging(0);
+                        $('#prevPage').css('display', 'none');
+                        $('span#p1').css('color', '#C0D8B6');
+                        
+                        var out = "";
+                        $(items).each(function (i, j) {
+                            var img = j.firstimage;
+                            if (!('firstimage' in j)) {
+                                img = "img/logo.png";
+                            }
+
+                            if (getCookie(j.contenttypeid + "_" + j.contentid)){
+                                var heart = "img/iconHeartFill.png";
+                            } else {
+                                heart = "img/iconHeartEmpty.png";
+                            }
+
+                            out += "<div class='sightsContainer'>";
+                            out += "<div class='sightsImage' style='background-image: url(" + img + ");'>";
+                            out += "<div class='like' id='" + language + "_" + j.contenttypeid + "_" + j.contentid + "' onclick='likeClicked(this);' style='background-image: url(" + heart + ");'></div>";
+                            out += "<a href='infoKorea_detail.html?language=" + language + "&contenttypeid=" + j.contenttypeid + "&contentid=" + j.contentid + "' target='_self'><div class='forAtag' >";
+                            out += "<div class='titleAndView'><span class='title'>" + j.title + "</span><span class='sightsCount glyphicon glyphicon-eye-open'> " + (new Intl.NumberFormat().format(j.readcount)) + "</span></div>";
+                            out += "</div></a></div>";
+                            out += "</div>";
+                        });
+                        $('.sightsList').html(out);
+
+                        flagMore = true;
+                    },
+                    error: function(req) {
+                        alert('상태: ' + req.status + ", " + req.responseText + ", error : " + req.error);
+                    }
+
+                });
+            } else {
+                $('#myModal').modal();
+            }
+        }
+        
+        // 더보기 함수
+        function showMore(p) {
+            flagMore = false;
+            
+            var keyword = $('#keyword').val();
+            keyword = encodeURI(keyword); // 키워드 인코딩
+            var url = "http://api.visitkorea.or.kr/openapi/service/rest/" + language + "/searchKeyword?ServiceKey=" + apiKey + "&keyword=" + keyword + "&_type=json&sigunguCode=&cat1=&cat2=&cat3=&numOfRows=10&&pageNo=" + p + "arrange=B&MobileOS=AND&MobileApp=appName";
+            $.ajax({
+                url: url
+                , type: 'get'
+                , jsonp: 'callback'
+                , success: function (data) {
+                    var items = data.response.body.items.item; // 관광지
+                    
+                    var out = "";
+                    $(items).each(function (i, j) {
+                        var img = j.firstimage;
+                        if (!('firstimage' in j)) {
+                            img = "img/logo.png";
+                        }
+                        
+                        if (getCookie(j.contenttypeid + "_" + j.contentid)) {
+                            var heart = "img/iconHeartFill.png";
+                        }
+                        else {
+                            heart = "img/iconHeartEmpty.png";
+                        }
+                        
+                        out += "<div class='sightsContainer'>";
+                        out += "<div class='sightsImage' style='background-image: url(" + img + ");'>";
+                        out += "<div class='like' id='" + language + "_" + j.contenttypeid + "_" + j.contentid + "' onclick='likeClicked(this);' style='background-image: url(" + heart + ");'></div>";
+                        out += "<a href='infoKorea_detail.html?language=" + language + "&contenttypeid=" + j.contenttypeid + "&contentid=" + j.contentid + "' target='_self'><div class='forAtag' >";
+                        out += "<div class='titleAndView'><span class='title'>" + j.title + "</span><span class='sightsCount glyphicon glyphicon-eye-open'> " + (new Intl.NumberFormat().format(j.readcount)) + "</span></div>";
+                        out += "</div></a></div>";
+                        out += "</div>";
+                    });
+
+                    $('.sightsList').append(out);
+                    flagMore = true;
+                }
+                , error: function (req) {
+                    alert('상태: ' + req.status + ", " + req.responseText + ", error : " + req.error);
+                }
+            });
+        }
+        
+        // 데스크탑 버전에서 페이지번호 10개씩 출력하는 함수
+        function tenthPaging(operator){
+            
+            $('.pages').css('display', 'none');
+            if(operator == 1){
+                // 이전 열개
+                prevNext -= 10;
+                                
+            } else if(operator == 2){
+                // 다음 열개
+                prevNext += 10;
+                
+            }
+            
+            
+            if(prevNext > 0){
+                $('#prevPage').css('display', 'inline-block');
+                $('#firstPage').css('display', 'inline-block');
+            }
+            $('.paging').children().each(function (i, j) {
+                var tenPage = this.id.substr(1);
+                if((tenPage-prevNext) <= 10 && (tenPage-prevNext) >0) {
+                    $(this).css('display', 'inline-block');
+                }
+            });
+            if(prevNext < Math.floor(totalPage/10)*10){
+                $('#nextPage').css('display', 'inline-block');
+                $('#lastPage').css('display', 'inline-block');
+            }
+        }
+
+        // 맨 앞, 맨 뒤로 페이징
+        function toFirstLast(item) {
+            // 이전 태그가 없다면 = to first
+            if(item.nextElementSibling != null){
+                prevNext = 10;
+                tenthPaging(1);
+                showPage(item.nextElementSibling.nextElementSibling);
+            } else if(item.previousElementSibling != null) {
+            // 다음 태그가 없다면 = to last
+                prevNext = Math.floor(totalPage/10)*10 -10;
+                tenthPaging(2);
+                showPage(item.previousElementSibling.previousElementSibling);
+            }
+        }
+        
+        // 데스크탑 버전 페이지 이동
+        function showPage(item) {
+            // 스크롤 제일 위로 이동
+            $('body').animate({scrollTop: 0}, 400);
+            
+            // 현재 선택된 페이지 색깔 변경, 나머지는 회색
+            $('.pages').css('color', 'gray');
+            $(item).css('color', '#C0D8B6');
+//            console.log(item.id.substr(1));
+            $.ajax({
+                url: url + item.id.substr(1)
+                , type: 'get'
+                , jsonp: 'callback'
+                , success: function (data) {
+                    var items = data.response.body.items.item; // 관광지
+                    
+                    var out = "";
+                    // each내용은 기본 관광지호출과 유사
+                    $(items).each(function (i, j) {
+                        var img = j.firstimage;
+                        if (!('firstimage' in j)) {
+                            img = "img/logo.png";
+                        }
+                        
+                        if (getCookie(j.contenttypeid + "_" + j.contentid)) {
+                            var heart = "img/iconHeartFill.png";
+                        }
+                        else {
+                            heart = "img/iconHeartEmpty.png";
+                        }
+                        
+                        out += "<div class='sightsContainer'>";
+                        out += "<div class='sightsImage' style='background-image: url(" + img + ");'>";
+                        out += "<div class='like' id='" + language + "_" + j.contenttypeid + "_" + j.contentid + "' onclick='likeClicked(this);' style='background-image: url(" + heart + ");'></div>";
+                        out += "<a href='infoKorea_detail.html?language=" + language + "&contenttypeid=" + j.contenttypeid + "&contentid=" + j.contentid + "' target='_self'><div class='forAtag' >";
+                        out += "<div class='titleAndView'><span class='title'>" + j.title + "</span><span class='sightsCount glyphicon glyphicon-eye-open'> " + (new Intl.NumberFormat().format(j.readcount)) + "</span></div>";
+                        out += "</div></a></div>";
+                        out += "</div>";
+                    });
+                    $('.sightsList').html(out);
+                }
+                , error: function (req) {
+                    alert('상태: ' + req.status + ", " + req.responseText + ", error : " + req.error);
+                }
+            });
+        }
+        
+        function likeClicked(item) {
+            var cookievalue = item.id;
+            var cookieid = cookievalue.split('_')[1] + "_" + cookievalue.split('_')[2];
+            var checkCookie = getCookie(cookieid);
+            if (checkCookie != null) {
+                delCookie(cookieid);
+                $(item).css('background-image', 'url("img/iconHeartEmpty.png")');
+            }
+            else {
+                saveCookie(cookieid, cookievalue, 18000);
+                $(item).css('background-image', "url('img/iconHeartFill.png')");
+            }
+        }
+
+        function saveCookie(cookieName, cookieValue, expireDays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (expireDays * 24 * 60 * 60 * 1000));
+            var expires = 'expires=' + d.toUTCString();
+            document.cookie = cookieName + "=" + cookieValue + ";" + expires + "; path=/";
+        }
+
+        function getCookie(cookieName) {
+            var name = cookieName + "=";
+            var subCook = document.cookie.split(';');
+            for (var i = 0; i < subCook.length; i++) {
+                if (subCook[i].indexOf(name) >= 0) {
+                    var findVal = subCook[i].split('=')[1]; // 쿠키내용
+                    return findVal;
+                }
+            }
+        }
+
+        function delCookie(cookieName) {
+            saveCookie(cookieName, "", 0);
+        }
+        
+    </script>
+</head>
+    
+<body>
+<!--    페이지 로딩 전 이미지    -->
+    <div id="loading">
+        <div class="sk-folding-cube">
+            <div class="sk-cube1 sk-cube"></div>
+            <div class="sk-cube2 sk-cube"></div>
+            <div class="sk-cube4 sk-cube"></div>
+            <div class="sk-cube3 sk-cube"></div>
+        </div>
+    </div>
+    
+<!--    헤더 로고   -->
+    <div class="headerLogo">
+        <div id="logo" onclick="location.href='infoKorea_main.html'"></div>
+    </div>
+            <div class="searchDiv">
+                <div style='width: 100%; margin-bottom: 10px; text-align: center;'>
+                    <input type='text' placeholder='검색어를 입력해주세요.' id='keyword' />
+                    <button type='button' class="btn btn-info" id='searchBtn' onclick='clickedSearch();'><span class="glyphicon glyphicon-search"></span></button>
+                </div>
+            </div>
+    
+<!--    출력리스트   -->
+    <div class="wrap wrapWidth">
+        <div class="container containerWidth">
+            <div class="sightsList"></div>
+            <div class="paging"></div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-sm">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title"><div id="modalLogo"></div></h4>
+            </div>
+            <div class="modal-body">
+              <p class="bg-danger" style="background-color:white; font-size: 1.5vw;">검색어를 입력해주세요!!</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+    </div>
+    
+<!--    네비게이션 버튼    -->
+    <div class="navBtn" id="backBtn"></div>
+    <div class="navBtn" id="likeBtn"></div>
+    <div class="navBtn" id="homeBtn"></div>
+    <div class="navBtn" id="menuBtn" ></div>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>info Korea - search detail</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="shortcut icon" href="img/destination.png">
+    <!-- jQuery CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <!-- fotorama -->
+    <!-- fotorama.css & fotorama.js. -->
+    <link href="css/fotorama.css" rel="stylesheet">
+    <script src="js/fotorama.js"></script>
+    <!-- google Map -->
+<!--    AIzaSyCX1bmsvijwju2HYlS8cY8QD5BPRi5ekdQ     -->
+    <script async defer id="googleMap"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCX1bmsvijwju2HYlS8cY8QD5BPRi5ekdQ&language=en">
+    </script>
+    <!-- bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <link href="css/infoKorea_detail.css" rel="stylesheet">
+    <!-- facebook -->
+    <meta property="fb:app_id" content="394068590973816" />
+    <meta id="facebookTITLE" property="og:title" content="infoKorea"/>
+    <meta id="facebookURL" property="og:url" content="http://ing9321.dothome.co.kr/infoKorea_detail.html"/>
+    <meta id="facebookDEC" property="og:description" content="Welcome to Korea"/>
+    <meta id="facebookIMG" property="og:image" content="http://ing9321.dothome.co.kr/img/shareThumbnail.jpg"/>
+    <meta property="og:type" content="website" />
+    <meta property="og:image:width" content="600" />
+	<meta property="og:image:height" content="315" />
+    <script>
+        apiKey = "qLl4v2edNeIFrjzZ3if3bfSoVYcUJ5Z8FtLMUHe6MQL%2FkFm80qBklM08mO8t0q%2Fk2l9Pb2d4GEoAtr5XL72IYg%3D%3D";
+        
+        $(document).ready(function () {
+            myFunction();
+            $('#logo').height($('#logo').width());
+            $('.facebookShare').height($(".facebookShare").width()*0.6);
+            $(window).resize(function(){
+                $('#logo').height($('#logo').width());
+            });
+            // 연습
+            //            contentid = 2442537;
+            //            console.log("contentid = " + contentid);
+            //            contenttypeid = 85;
+            //            console.log("contenttypeid = " + contenttypeid);
+            //            language = "JpnService";
+            //            console.log("language = " + language);
+            //            languageArr = ["ホームページ", "電話番号", " アドレス", "はじめに", "案内", "利用時間", "休日", "駐車施設", "総距離", "所要時間", "可能年齢", "イベント会場", "開始日", "終了日", "要時間", "スポンサー", "スポンサー電話番号", "スポンサー", "スポンサー電話番号", "案内", "収容人数", "客室数", "客室タイプ", "駐車可能", "調理可能", "チェックイン", "チェックアウト", "予約", "コース", "はじめに", "客室", "サイズ", "最小人数", "最大人数", "浴槽", "ドライヤー", "インターネット", "冷蔵庫", "洗面道具"];
+            //            for (var i = 0; i < languageArr.length; i++) {
+            //                languageArr[i] += " : ";
+            //            }
+            //            console.log(languageArr);
+            //            setTimeout("detailParse()", 60);
+            
+            // ?contentid=282104&contenttypeid=76&language=JpnService
+            // 통신
+            contentid = getParameter('contentid');
+            console.log("contentid = " + contentid);
+            contenttypeid = getParameter('contenttypeid');
+            console.log("contentTypeId = " + contenttypeid);
+            language = getParameter('language');
+            console.log("language = " + language);
+            languageArr = "";
+            languageParse();
+            
+            var btnFlag = false;
+            $('#menuBtn').click(function () {
+                if (!btnFlag) {
+                    $('#homeBtn').animate({
+                        bottom: '55px'
+                    }, 300);
+                    $('#likeBtn').animate({
+                        bottom: '105px'
+                    }, 300);
+                    $('#backBtn').animate({
+                        bottom: '155px'
+                    }, 300);
+                    btnFlag = true;
+                }
+                else {
+                    $('.navBtn').animate({
+                        bottom: '5px'
+                    }, 300);
+                    btnFlag = false;
+                }
+            });
+            $('#backBtn').click(function () {
+                window.history.back();
+            });
+            $('#likeBtn').click(function () {
+                window.location = "infoKorea_searchList.html?favorite=Y";
+            });
+            $('#homeBtn').click(function () {
+                window.location = "infoKorea_main.html";
+            });
+        });
+        
+        // json파싱 메소드
+        function jsonParse(language, category, contentid, contenttypeid, contentid) {
+            console.log(category);
+            var sql = "";
+            var http = "http://api.visitkorea.or.kr/openapi/service/rest/";
+            var etc = "&MobileOS=ETC&MobileApp=TourAPI3.0_Guide";
+            if (category == "detailCommon") {
+                sql = "&defaultYN=Y&firstImageYN=Y&areacodeYN=Y&catcodeYN=Y&addrinfoYN=Y&mapinfoYN=Y&overviewYN=Y&transGuideYN=Y&_type=json";
+            }
+            else if (category == "detailIntro") {
+                sql = "&introYN=Y&_type=json";
+            }
+            else if (category == "detailInfo") {
+                sql = "&listYN=Y&_type=json";
+            }
+            else if (category == "detailImage") {
+                sql = "&imageYN=Y&_type=json";
+            }
+            if (category == "detailImage") {
+                //  type->etc->id->sql
+                var urlParse = http + language + "/" + category + "?ServiceKey=" + apiKey + "&contentTypeId=" + contenttypeid + etc + "&contentId=" + contentid + sql;
+            }
+            else {
+                //  type->id->etc->sql
+                var urlParse = http + language + "/" + category + "?ServiceKey=" + apiKey + "&contentTypeId=" + contenttypeid + "&contentId=" + contentid + etc + sql;
+            }
+            console.log(urlParse);
+            $.ajax({
+                url: urlParse
+                , type: 'get'
+                , jsonp: 'callback'
+                , success: function (data) {
+                    //                    console.log("url = " + urlParse);
+                    var items = data.response.body.items;
+                    console.log(data);
+                    if(items != ""){
+                        if (category == "detailCommon") {
+                            commonPrint(items);
+                        }
+                        else if (category == "detailIntro") {
+                            introPrint(items);
+                        }
+//                        else if (category == "detailInfo" && contenttypeid != 80 && contenttypeid != 76) {
+//                            infoPrint(items);
+//                        }
+                        else if (category == "detailInfo") {
+                            infoPrint(items);
+                        }
+                    }
+                    
+                    if (category == "detailImage") {
+                        imagePrint(items);
+                    }
+                }
+                , error: function (req) {
+                    alert('상태: ' + req.status + ", " + req.responseText + ", error : " + req.error);
+                }
+            });
+        }
+        // language json파싱 메소드
+        function languageParse() {
+            $.ajax({
+                url: "json/detailLanguage.json"
+                , type: 'get'
+                , jsonp: 'callback'
+                , success: function (data) {
+                    //                    console.log("data success");
+                    //                    console.log(data);
+                    languageSave(data);
+                    setTimeout("detailParse()", 60);
+                }
+                , error: function (req) {
+                    alert('상태: ' + req.status + ", " + req.responseText + ", error : " + req.error);
+                }
+            });
+        }
+        // language 저장
+        function languageSave(data) {
+            console.log(data);
+            if (language == "KorService") languageArr = data.KorService;
+            else if (language == "EngService") languageArr = data.EngService;
+            else if (language == "JpnService") languageArr = data.JpnService;
+            else if (language == "ChsService") languageArr = data.ChsService;
+            else if (language == "ChtService") languageArr = data.ChtService;
+            else if (language == "GerService") languageArr = data.GerService;
+            else if (language == "FreService") languageArr = data.FreService;
+            else if (language == "SpnService") languageArr = data.SpnService;
+            else if (language == "RusService") languageArr = data.RusService;
+            for (var i = 0; i < languageArr.length; i++) {
+                languageArr[i] += " : ";
+            }
+            console.log(languageArr);
+        }
+
+        function detailParse() {
+            //            console.log(languageArr);
+            //        category = "detailCommon";
+            setTimeout(function () {
+                jsonParse(language, "detailCommon", contentid, contenttypeid, contentid)
+            }, 60);
+            //        category = "detailIntro";
+            setTimeout(function () {
+                jsonParse(language, "detailIntro", contentid, contenttypeid, contentid)
+            }, 120);
+            //        category = "detailInfo";
+            setTimeout(function () {
+                jsonParse(language, "detailInfo", contentid, contenttypeid, contentid)
+            }, 180);
+            //        category = "detailImage";
+            setTimeout(function () {
+                jsonParse(language, "detailImage", contentid, contenttypeid, contentid)
+            }, 240);
+        }
+        // detail common 등록
+        function commonPrint(items) {
+            var output = "";
+            var item = items.item;
+            console.log("items = " + items);
+            console.log("item = " + item);
+            // 관광지 typeid:12
+            if ('title' in item) {
+                $("#divTitle").html(item.title);
+                shareTitle = item.title;
+            }
+            if ('homepage' in item) {
+                output += '<div id="divHomepage" class="panel-body">';
+                output += '<b>';
+                output += languageArr[0];
+                output += '</b>';
+                output += item.homepage + '</div>';
+            }
+            if ('tel' in item) {
+                output += '<div id="divTel" class="panel-body">';
+                output += '<b>';
+                output += languageArr[1];
+                output += '</b>';
+                output += item.tel + '</div>';
+            }
+            if ('addr1' in item) {
+                output += '<div id="divAddr" class="panel-body">';
+                output += '<b>';
+                output += languageArr[2];
+                output += '</b>';
+                output += item.addr1 + '</div>';
+                $(".mapInfo").append(item.addr1);
+            }
+            if ('overview' in item) {
+                output += '<div id="divOverview" class="panel-body">';
+                output += '<b>';
+                output += languageArr[3];
+                output += '</b>';
+                output += item.overview + '</div>';
+                shareDec = item.overview;
+            }
+            if ('firstimage' in item) {
+                var img = "<img src=" + item.firstimage + ">";
+                $(".fotorama").append(img);
+                shareImg = item.firstimage;
+            }
+            $("#collapse1").append(output);
+            
+            // 지도그리기
+            var myLatLng = {lat: item.mapy, lng: item.mapx};
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: myLatLng,
+                zoom: 12
+            });
+            var marker = new google.maps.Marker({
+                position: myLatLng,
+                map: map,
+                icon: 'img/mapicon.png'
+            });
+        }
+        // detail intro 등록
+        function introPrint(items) {
+            var item = items.item;
+            var output = "";
+            // 관광지 typeid:12
+            if ('infocenter' in item) {
+                output += '<div id="divInfocenter" class="panel-body">';
+                output += '<b>';
+                output += languageArr[4];
+                output += '</b>';
+                output += item.infocenter + '</div>';
+            }
+            if ('usetime' in item) {
+                output += '<div id="divUsetime" class="panel-body">';
+                output += '<b>';
+                output += languageArr[5];
+                output += '</b>';
+                output += item.usetime + '</div>';
+            }
+            if ('restdate' in item) {
+                output += '<div id="divRestdate" class="panel-body">';
+                output += '<b>';
+                output += languageArr[6];
+                output += '</b>';
+                output += item.restdate + '</div>';
+            }
+            if ('parking' in item) {
+                if(item.parking != ""){
+                    output += '<div id="divParking" class="panel-body">';
+                output += '<b>';
+                    output += languageArr[7];
+                output += '</b>';
+                    output += item.parking + '</div>';
+                }
+            }
+            if ('distance' in item) {
+                output += '<div id="divDistance" class="panel-body">';
+                output += '<b>';
+                output += languageArr[8];
+                output += '</b>';
+                output += item.distance + '</div>';
+            }
+            if ('taketime' in item) {
+                output += '<div id="divTaketime" class="panel-body">';
+                output += '<b>';
+                output += languageArr[9];
+                output += '</b>';
+                output += item.taketime + '</div>';
+            }
+            if ('agelimit' in item) {
+                output += '<div id="divAgelimit" class="panel-body">';
+                output += '<b>';
+                output += languageArr[10];
+                output += '</b>';
+                output += item.agelimit + '</div>';
+            }
+            if ('eventplace' in item) {
+                output += '<div id="divEventplace" class="panel-body">';
+                output += '<b>';
+                output += languageArr[11];
+                output += '</b>';
+                output += item.eventplace + '</div>';
+            }
+            if ('eventstartdate' in item) {
+                output += '<div id="divEventstartdate" class="panel-body">';
+                output += '<b>';
+                output += languageArr[12];
+                output += '</b>';
+                output += item.eventstartdate + '</div>';
+            }
+            if ('eventenddate' in item) {
+                output += '<div id="divEventenddate" class="panel-body">';
+                output += '<b>';
+                output += languageArr[13];
+                output += '</b>';
+                output += item.eventenddate + '</div>';
+            }
+            if ('spendtimefestival' in item) {
+                output += '<div id="divSpendtimefestival" class="panel-body">';
+                output += '<b>';
+                output += languageArr[14];
+                output += '</b>';
+                output += item.spendtimefestival + '</div>';
+            }
+            if ('sponsor1' in item) {
+                output += '<div id="divSponsor1" class="panel-body">';
+                output += '<b>';
+                output += languageArr[15];
+                output += '</b>';
+                output += item.sponsor1 + '</div>';
+            }
+            if ('sponsor1tel' in item) {
+                output += '<div id="divSponsor1tel" class="panel-body">';
+                output += '<b>';
+                output += languageArr[16];
+                output += '</b>';
+                output += item.sponsor1tel + '</div>';
+            }
+            if ('sponsor2' in item) {
+                output += '<div id="divSponsor2" class="panel-body">';
+                output += '<b>';
+                output += languageArr[17];
+                output += '</b>';
+                output += item.sponsor2 + '</div>';
+            }
+            if ('sponsor2tel' in item) {
+                output += '<div id="divSponsor2tel" class="panel-body">';
+                output += '<b>';
+                output += languageArr[18];
+                output += '</b>';
+                output += item.sponsor2tel + '</div>';
+            }
+            if ('expguide' in item && item.expguide != "") {
+                output += '<div id="divExpguide" class="panel-body">';
+                output += item.expguide + '</div>';
+            }
+            if ('infocenterlodging' in item) {
+                output += '<div id="divInfocenterlodging" class="panel-body">';
+                output += '<b>';
+                output += languageArr[19];
+                output += '</b>';
+                output += item.infocenterlodging + '</div>';
+            }
+            if ('accomcountlodging' in item) {
+                output += '<div id="divAccomcountlodging" class="panel-body">';
+                output += '<b>';
+                output += languageArr[20];
+                output += '</b>';
+                output += item.accomcountlodging + '</div>';
+            }
+            if ('roomcount' in item) {
+                output += '<div id="divRoomcount" class="panel-body">';
+                output += '<b>';
+                output += languageArr[21];
+                output += '</b>';
+                output += item.roomcount + '</div>';
+            }
+            if ('roomtype' in item) {
+                output += '<div id="divRoomtype" class="panel-body">';
+                output += '<b>';
+                output += languageArr[22];
+                output += '</b>';
+                output += item.roomtype + '</div>';
+            }
+            if ('parkinglodging' in item) {
+                output += '<div id="divParkinglodging" class="panel-body">';
+                output += '<b>';
+                output += languageArr[23];
+                output += '</b>';
+                output += item.parkinglodging + '</div>';
+            }
+            if ('chkcooking' in item) {
+                output += '<div id="divChkcooking" class="panel-body">';
+                output += '<b>';
+                output += languageArr[24];
+                output += '</b>';
+                output += item.chkcooking + '</div>';
+            }
+            if ('checkintime' in item) {
+                output += '<div id="divCheckintime" class="panel-body">';
+                output += '<b>';
+                output += languageArr[25];
+                output += '</b>';
+                output += item.checkintime + '</div>';
+            }
+            if ('checkouttime' in item) {
+                output += '<div id="divCheckouttime" class="panel-body">';
+                output += '<b>';
+                output += languageArr[26];
+                output += '</b>';
+                output += item.checkouttime + '</div>';
+            }
+            if ('reservationlodging' in item) {
+                output += '<div id="divReservationlodging" class="panel-body">';
+                output += '<b>';
+                output += languageArr[27];
+                output += '</b>';
+                output += item.reservationlodging + '</div>';
+            }
+            if ('infocenterculture' in item) {
+                output += '<div id="divInfocenterculture" class="panel-body">';
+                output += '<b>';
+                output += languageArr[30];
+                output += '</b>';
+                output += item.infocenterculture + '</div>';
+            }
+            if ('parkingculture' in item) {
+                output += '<div id="divParkingculture" class="panel-body">';
+                output += '<b>';
+                output += languageArr[31];
+                output += '</b>';
+                output += item.parkingculture + '</div>';
+            }
+            if ('parkingfee' in item) {
+                output += '<div id="divParkingfee" class="panel-body">';
+                output += '<b>';
+                output += languageArr[32];
+                output += '</b>';
+                output += item.parkingfee + '</div>';
+            }
+            if ('restdateculture' in item) {
+                output += '<div id="divRestdateculture" class="panel-body">';
+                output += '<b>';
+                output += languageArr[33];
+                output += '</b>';
+                output += item.restdateculture + '</div>';
+            }
+            if ('usefee' in item) {
+                output += '<div id="divUsefee" class="panel-body">';
+                output += '<b>';
+                output += languageArr[34];
+                output += '</b>';
+                output += item.usefee + '</div>';
+            }
+            if ('usetimeculture' in item) {
+                output += '<div id="divUsetimeculture" class="panel-body">';
+                output += '<b>';
+                output += languageArr[35];
+                output += '</b>';
+                output += item.usetimeculture + '</div>';
+            }
+            if ('reservationurl' in item) {
+                output += '<div id="divReservationurl" class="panel-body">';
+                output += '<b>';
+                output += languageArr[36];
+                output += '</b>';
+                output += item.reservationurl + '</div>';
+            }
+            if ('scalelodging' in item) {
+                output += '<div id="divScalelodging" class="panel-body">';
+                output += '<b>';
+                output += languageArr[37];
+                output += '</b>';
+                output += item.scalelodging + '</div>';
+            }
+            
+            
+            console.log(item);
+            $("#collapse2").prepend(output);
+        }
+        // detail info 등록
+        function infoPrint(items) {
+            var item = items.item;
+            var output = "";
+            console.log(item);
+            if (Array.isArray(item)) {
+                for (var i = 0; i < item.length; i++) {
+                    if ('infoname' in item[i]) {
+                        output += '<div class="panel-body divInfoname">';
+                        output += item[i].infoname + '</div>';
+                    }
+                    if ('infotext' in item[i]) {
+                        output += '<div class="panel-body divInfotext">';
+                        output += item[i].infotext + '</div>';
+                    }
+                }
+            }
+            // http://zedai7518.dothome.co.kr/visitKor/infoKorea_detail.html?contentid=282104&contenttypeid=76&language=JpnService
+            else {
+                if ('infoname' in item) {
+                    output += '<div class="panel-body divInfoname">';
+                    output += item.infoname + '</div>';
+                }
+                if ('infotext' in item) {
+                    output += '<div class="panel-body divInfotext">';
+                    output += item.infotext + '</div>';
+                }
+            }
+            // typeid = 25 : 코스
+            if (contenttypeid == 25) {
+                for (var i = 0; i < item.length; i++) {
+                    if ('subdetailimg' in item[i]) {
+                        output += '<img src="';
+                        output += item[i].subdetailimg + '">';
+                    }
+                    output += '<div id="divSubname" class="panel-body">';
+                    output += languageArr[27];
+                    output += item[i].subname + "</div>";
+                    output += '<div id="divSubdetailoverview" class="panel-body">';
+                    output += languageArr[28];
+                    output += item[i].subdetailoverview + "</div>";
+                }
+            }
+            $("#collapse2").append(output);
+        }
+        // detail 이미지를 fotorama에 등록
+        function imagePrint(items) {
+            var output = "";
+            // 관광지 typeid:12
+            if (items != "") {
+                var item = items.item;
+                for (var i = 0; i < item.length; i++) {
+                    output += "<img src=" + item[i].originimgurl + ">";
+                }
+            }
+            else if ($(".fotorama").children.length < 1) {
+                // 이미지가 하나도 없을 경우
+                console.log($(".fotorama").children.length);
+                output += "<img src='img/nothing.jpg'>";
+            }
+            console.log(items);
+            $(".fotorama").append(output);
+            $(".fotorama").fotorama();
+        }
+        // 파라메터 얻는 메소드
+        function getParameter(param) {
+            // 리턴시킬 파라메터 값
+            var value = '';
+            // url을 얻어온다.
+            var url = location.href;
+            //            console.log(url);
+            // split('&')는 &를 기준으로 나눠서 배열에 저장
+            var parameter = (url.slice(url.indexOf('?') + 1, url.length)).split('&');
+            //            console.log(parameter);
+            for (var i = 0; i < parameter.length; i++) {
+                var name = parameter[i].split('=')[0];
+                //                console.log(name);
+                if (name.toLowerCase() == param) {
+                    value = parameter[i].split('=')[1];
+                    break;
+                }
+            }
+            return value;
+        }
+        function myFunction() {
+            setTimeout(function () {
+                $('#loading').css('display', 'none');
+                $('.wrapOverlay').css('display', 'none');
+            }, 2000);
+        }
+        // 페이스북 공유
+        function facebookShare(){
+            var url = encodeURI(document.location.href);
+            window.open("http://www.facebook.com/sharer/sharer.php?u="+url);
+        }
+        
+    </script>
+</head>
+
+<body>
+    <div class="headerLogo">
+        <div id="logo" onclick="location.href='infoKorea_main.html'"></div>
+    </div>
+    <!--    페이지 로딩 전 이미지 -->
+    <div id="loading">
+        <div class="sk-folding-cube">
+            <div class="sk-cube1 sk-cube"></div>
+            <div class="sk-cube2 sk-cube"></div>
+            <div class="sk-cube4 sk-cube"></div>
+            <div class="sk-cube3 sk-cube"></div>
+        </div>
+    </div>
+    <div class="wrapBackground"></div>
+    <div>
+        <div class="wrap">
+            <div class="container">
+                <div class="fotorama" data-width="90%" data-ratio="16/9" data-fit="cover"> </div>
+            </div>
+            <div class="container">
+                <div id="divTitle"></div>
+                <div class="share">
+                    <a href="javascript:facebookShare()">
+    <!--                    <div class="facebookShareImg"></div>-->
+                        <img class="facebookShareImg" src="img/fb.png"/>
+                    </a>
+                </div>
+                <div class="panel-group" id="accordion">
+                    <div class="panel panel-default">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+                            <div class="panel-heading"> <img src="img/iconInfo.png" /><img class="plus" src="img/plus.png" /> </div>
+                        </a>
+                        <div id="collapse1" class="panel-collapse collapse"> </div>
+                    </div>
+                    <div id="collapse1" class="panel-collapse collapse"> </div>
+                    <div class="panel panel-default">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
+                            <div class="panel-heading"> <img src="img/iconIntro.png" /><img class="plus" src="img/plus.png" /> </div>
+                        </a>
+                        <div id="collapse2" class="panel-collapse collapse"> </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div id="map" style="margin-top: 5%"> </div>
+        <div class="mapInfo"> <img src="img/mapicon.png" /> </div>
+    </div>
+    </div>
+    <!--    nav     -->
+    <div class="navBtn" id="backBtn"></div>
+    <div class="navBtn" id="likeBtn"></div>
+    <div class="navBtn" id="homeBtn"></div>
+    <div class="navBtn" id="menuBtn"></div>
+</body>
+
+</html>

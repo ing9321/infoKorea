@@ -1,0 +1,580 @@
+<!--    넘겨받은 url : infoKorea_searchList.html?language=ChtService&areaCode=33&contentTypeId=12    -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>info Korea - search list</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link href="css/infoKorea_searchList.css" rel="stylesheet">
+    <link rel="shortcut icon" href="img/destination.png">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        /* 폰트*/
+        WebFontConfig = {
+            custom: {
+                families: ['Nanum Gothic']
+                , urls: ['http://fonts.googleapis.com/earlyaccess/nanumgothic.css']
+            }
+        };
+        (function () {
+            var wf = document.createElement('script');
+            wf.src = ('https:' == document.location.protocol ? 'https' : 'http') + '://ajax.googleapis.com/ajax/libs/webfont/1.4.10/webfont.js';
+            wf.type = 'text/javascript';
+            wf.async = 'true';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(wf, s);
+        })();
+    </script>
+    <script>
+        // 로딩 함수
+        myFunction();
+        
+        // 다음 페이지를 위한 변수
+        page = 1;
+        totalPage = 0;
+        flagMore = false;
+        prevNext = 0;
+        
+        // apikey
+        apiKey = "qLl4v2edNeIFrjzZ3if3bfSoVYcUJ5Z8FtLMUHe6MQL%2FkFm80qBklM08mO8t0q%2Fk2l9Pb2d4GEoAtr5XL72IYg%3D%3D";
+
+        // 전달받은 파라미터에서 언어 추출
+        language = getParameter('language');
+        // 전달받은 파라미터에서 지역코드 추출
+        areaCode = getParameter('areaCode');
+        // 전달받은 파라미터에서 관광타입 추출
+        contenttypeid = getParameter('contentTypeId');
+        
+        // api url
+        url = "http://api.visitkorea.or.kr/openapi/service/rest/" + language + "/areaBasedList?ServiceKey=" + apiKey + "&_type=json" + "&contentTypeId=" + contenttypeid + "&areaCode=" + areaCode + "&sigunguCode=&cat1=&cat2=&cat3=&numOfRows=10&pageNo=1&arrange=B&MobileOS=AND&MobileApp=appName";
+        moreUrl = "http://api.visitkorea.or.kr/openapi/service/rest/" + language + "/areaBasedList?ServiceKey=" + apiKey + "&_type=json&arrange=B&MobileOS=AND&MobileApp=appName" + "&contentTypeId=" + contenttypeid + "&areaCode=" + areaCode + "&sigunguCode=&cat1=&cat2=&cat3=&numOfRows=10&pageNo=";
+
+        $(document).ready(function () {
+            $('#logo').height($('#logo').width());
+            
+            // 윈도우 너비에 따른 화면 조정
+            if (parseInt($(window).width()) < 801) {
+                $('.wrapWidth').removeClass('wrap');
+                $('.containerWidth').removeClass('container');
+                $('.paging').css('display', 'none');
+                $('.bg-danger').css('font-size', '4vw');
+            }
+            $(window).resize(function () {
+                $('#logo').height($('#logo').width());
+                
+                if (parseInt($(window).width()) < 801) {
+                    $('.wrapWidth').removeClass('wrap');
+                    $('.containerWidth').removeClass('container');
+                    $('.paging').css('display', 'none');
+                    $('.bg-danger').css('font-size', '4vw');
+                }
+                else if (parseInt($(window).width()) > 800) {
+//                    showPage("p" + page);
+                    $('.wrapWidth').addClass('wrap');
+                    $('.containerWidth').addClass('container');
+                    $('.paging').css('display', 'block');
+                    $('.bg-danger').css('font-size', '1.5vw');
+                    $('body').animate({scrollTop: 0}, 400);
+                    travelSearch(url);
+                }
+            });
+            
+            // 전달받은 파라미터 favorite이 Y이면 즐겨찾기 페이지 로딩
+            if(getParameter('favorite') == 'Y'){
+//                if(hateCookies() != null){
+                    calledCookies(hateCookies());
+//                } else {
+//                    $('.sightsList').html("<div class='sightsContainer' id='noItem'>No Result</div>");
+//                }
+            } else {
+                // 관광지 출력 함수
+                travelSearch(url);
+            }
+            
+            // 네비게이션 버튼 최소화 상태
+            var btnFlag = false;
+            // 네비게이션 버튼이 클릭되면
+            $('#menuBtn').click(function () {
+                // 버튼 플래그가 false일 때 버튼 펼치기
+                if (!btnFlag) {
+                    $('#keywordBtn').animate({
+                        bottom: '55px'
+                    }, 300);
+                    $('#likeBtn').animate({
+                        bottom: '105px'
+                    }, 300);
+                    $('#backBtn').animate({
+                        bottom: '155px'
+                    }, 300);
+                    // 버튼 펼치면 버튼 플래그 true
+                    btnFlag = true;
+                }
+                // 버튼 플래그가 true면 접기
+                else {
+                    $('.navBtn').animate({
+                        bottom: '5px'
+                    }, 300);
+                    // 버튼이 접혔으면 플래그 false
+                    btnFlag = false;
+                }
+            });
+            
+            // 뒤로가기 버튼을 클릭했을 때
+            $('#backBtn').click(function () {
+                window.history.back();
+            });
+            
+            // 즐겨찾기 버튼을 클릭했을 때
+            $('#likeBtn').click(function () {
+                if(hateCookies() != null){
+                    console.log(hateCookies());
+                    calledCookies(hateCookies());
+                } else {
+                    console.log('aaaa');
+                }
+            });
+            
+            // 검색 버튼을 클릭했을 때
+            $('#keywordBtn').click(function () {
+                // 검색페이지로 이동
+                if(language != ''){
+                    window.location = "infoKorea_keywordSearch.html?language=" + language;
+                } else {
+                    window.location = "infoKorea_keywordSearch.html?language=KorService";
+                }
+            });
+            
+            // 윈도우가 스크롤 됐을 때
+            $(window).scroll(function() {
+                if($(window).width() < 801){
+                    // 더보기가 참일 때
+                    if(flagMore){
+                        // 윈도우 스크롤 위치가 문서길이와 동일할 경우(스크롤이 맨 밑일 때)
+                        if($(window).scrollTop() == $(document).height() - $(window).height()) {
+                            // 전체 페이지 수보다 현재 페이지가 작으면
+                            if(page < totalPage) {
+                                // 다음 페이지 출력
+                                showMore(++page);
+                            }
+                        }
+                    }
+                }
+            });
+            
+            
+        });
+
+        function getParameter(param) {
+            var value = ''; // 리턴시킬 파라메터 값
+            var url = location.href; // url을 얻어온다.
+            // url을 ?부터 잘라서 &로 나눠 배열에 저장
+            var parameter = (url.slice(url.indexOf('?') + 1, url.length)).split('&');
+            // 첫번째 : 언어, 두번째 : 지역, 세번째 : 관광타입
+            for (var i = 0; i < parameter.length; i++) {
+                var name = parameter[i].split('=')[0];
+                if (name == param) {
+                    value = parameter[i].split('=')[1];
+                    break;
+                }
+            }
+//            console.log(value);
+            return value;
+        }
+
+        // 관광지 리스트 정보를 출력하는 함수
+        function travelSearch(url) {
+            $.ajax({
+                url: url
+                , type: 'get'
+                , jsonp: 'callback'
+                , success: function (data) {
+                    console.log(data);
+                    if(data.response.body.items == ""){
+                        $('.sightsList').html("<div class='sightsContainer' id='noItem'>No Result</div>");
+                        return false;
+                    }
+                    var items = data.response.body.items.item; // 관광지
+                    
+                    var total = data.response.body.totalCount; // 검색된 관광지 수
+                    totalPage = Math.ceil(total / 10); // 검색된 관광지 리스트 페이지 수
+                    
+                    // 페이지만큼 데스크탑 버전 페이지란에 태그 삽입
+                    var pageTag = "<span class='pages' id='firstPage' onclick='toFirstLast(this);'><img src='img/toFirst.png'/></span>";
+                    // 페이지 수가 10보다 많으면 1부터 10까지 페이지만 출력
+                    pageTag += "<span class='pages' id='prevPage' onclick='tenthPaging(1);'><img src='img/prev.png'/></span>";
+                    for(var i = 0; i < totalPage; i++) {
+                        pageTag += "<span class='pages' id='p" + (i+1) + "' onclick='showPage(this);'>" + (i+1) + "</span>";
+//                            $('.paging').append(pageTag);
+                    }
+                    $('.paging').html('');
+                    $('.paging').append(pageTag);
+                    // 다음 열개의 페이지 출력 버튼
+                    $('.paging').append("<span class='pages' id='nextPage' onclick='tenthPaging(2);'><img src='img/next.png'/></span><span class='pages' id='lastPage' onclick='toFirstLast(this);'><img src='img/toLast.png'/></span>");
+                    
+                    tenthPaging(0);
+                    $('#prevPage').css('display', 'none');
+                    // 현재 페이지 색
+                    $('span#p1').css('color', '#C0D8B6');
+                    
+                    var out = "";
+                    $(items).each(function (i, j) {
+                        var img = j.firstimage; // 관광지 이미지
+                        //관광지 이미지가 없으면 대체 이미지
+                        if (!('firstimage' in j)) {
+                            img = "img/logo.png";
+                        }
+                        
+                        // 쿠키에 저장된 즐겨찾기 정보를 확인
+                        if (getCookie(j.contenttypeid + "_" + j.contentid)) {
+                            // 쿠키에 있으면 즐찾하트
+                            var heart = "img/iconHeartFill.png";
+                        }
+                        else {
+                            // 쿠키 없으면 빈하트
+                            heart = "img/iconHeartEmpty.png";
+                        }
+                        
+                        // 관광지 item 하나를 포함하는 div
+                        out += "<div class='sightsContainer'>";
+                        // item 이미지
+                        out += "<div class='sightsImage' style='background-image: url(" + img + ");'>";
+                        // like div
+                        // id = 언어 + 관광타입 + 관광지id
+                        // 좋아요 클릭 시 호출될 함수 설정
+                        out += "<div class='like' id='" + language + "_" + j.contenttypeid + "_" + j.contentid + "' onclick='likeClicked(this);' style='background-image: url(" + heart + ");'></div>";
+                        // 클릭시 이동 a태그
+//                        out += "<div class='forAtag' >";
+                        // title + count
+                        out += "<a href='infoKorea_detail.html?language=" + language + "&contenttypeid=" + j.contenttypeid + "&contentid=" + j.contentid + "' target='_self'><div class='titleAndView'><span class='title'>" + j.title + "</span><span class='sightsCount glyphicon glyphicon-eye-open'> " + (new Intl.NumberFormat().format(j.readcount)) + "</span></div>";
+                        out += "</a></div></div>";
+//                        out += "</div>";
+                    });
+                    $('.sightsList').html(out);
+                    
+                    flagMore = true; // 10개까지 출력된 후 더보기 플래그 참으로 변경
+                }
+                , error: function (req) {
+                    alert('상태: ' + req.status + ", " + req.responseText + ", error : " + req.error);
+                }
+            });
+        }
+
+        // 더보기 함수
+        function showMore(p) {
+//            page++;
+            // 더보기 함수가 실행되었으므로 플래그 false
+            flagMore = false;
+
+            $.ajax({
+                // 전달받은 페이지의 결과값 출력
+                url: moreUrl + p
+                , type: 'get'
+                , jsonp: 'callback'
+                , success: function (data) {
+                    var items = data.response.body.items.item; // 관광지
+                    
+                    var out = "";
+                    // each내용은 기본 관광지호출과 유사
+                    $(items).each(function (i, j) {
+                        var img = j.firstimage;
+                        if (!('firstimage' in j)) {
+                            img = "img/logo.png";
+                        }
+                        
+                        if (getCookie(j.contenttypeid + "_" + j.contentid)) {
+                            var heart = "img/iconHeartFill.png";
+                        }
+                        else {
+                            heart = "img/iconHeartEmpty.png";
+                        }
+                        
+                        out += "<div class='sightsContainer'>";
+                        out += "<div class='sightsImage' style='background-image: url(" + img + ");'>";
+                        out += "<div class='like' id='" + language + "_" + j.contenttypeid + "_" + j.contentid + "' onclick='likeClicked(this);' style='background-image: url(" + heart + ");'></div>";
+                        out += "<a href='infoKorea_detail.html?language=" + language + "&contenttypeid=" + j.contenttypeid + "&contentid=" + j.contentid + "' target='_self'><div class='forAtag' >";
+                        out += "<div class='titleAndView'><span class='title'>" + j.title + "</span><span class='sightsCount glyphicon glyphicon-eye-open'> " + (new Intl.NumberFormat().format(j.readcount)) + "</span></div>";
+                        out += "</div></a></div>";
+                        out += "</div>";
+                    });
+                    // 저장된 div 내용을 기본 출력 페이지에 덧붙이기
+                    $('.sightsList').append(out);
+                    flagMore = true; // 출력 후 더보기 플래그 다시 true
+                }
+                , error: function (req) {
+                    alert('상태: ' + req.status + ", " + req.responseText + ", error : " + req.error);
+                }
+            });
+        }
+        
+        // 데스크탑 버전에서 페이지번호 10개씩 출력하는 함수
+        function tenthPaging(operator){
+            
+            $('.pages').css('display', 'none');
+            if(operator == 1){
+                // 이전 열개
+                prevNext -= 10;
+                                
+            } else if(operator == 2){
+                // 다음 열개
+                prevNext += 10;
+            }
+            
+            if(prevNext > 0){
+                $('#prevPage').css('display', 'inline-block');
+                $('#firstPage').css('display', 'inline-block');
+            }
+            $('.paging').children().each(function (i, j) {
+                var tenPage = this.id.substr(1);
+                if((tenPage-prevNext) <= 10 && (tenPage-prevNext) >0) {
+                    $(this).css('display', 'inline-block');
+                }
+            });
+            if(prevNext < Math.floor(totalPage/10)*10){
+                $('#nextPage').css('display', 'inline-block');
+                $('#lastPage').css('display', 'inline-block');
+            }
+        }
+        
+        // 맨 앞, 맨 뒤로 페이징
+        function toFirstLast(item) {
+            console.log(item.previousElementSibling);
+            console.log(item);
+            console.log(item.nextElementSibling);
+            // 이전 태그가 없다면 = to first
+            if(item.nextElementSibling != null){
+                prevNext = 10;
+                tenthPaging(1);
+                showPage(item.nextElementSibling.nextElementSibling);
+            } else if(item.previousElementSibling != null) {
+            // 다음 태그가 없다면 = to last
+                prevNext = Math.floor(totalPage/10)*10 -10;
+                tenthPaging(2);
+                showPage(item.previousElementSibling.previousElementSibling);
+            }
+        }
+        
+        // 데스크탑 버전 페이지 이동
+        function showPage(item) {
+            console.log(item);
+            // 스크롤 제일 위로 이동
+            $('body').animate({scrollTop: 0}, 400);
+            
+            // 현재 선택된 페이지 색깔 변경, 나머지는 회색
+            $('.pages').css('color', 'gray');
+            $(item).css('color', '#C0D8B6');
+//            console.log(item.id.substr(1));
+            $.ajax({
+                url: moreUrl + item.id.substr(1)
+                , type: 'get'
+                , jsonp: 'callback'
+                , success: function (data) {
+                    var items = data.response.body.items.item; // 관광지
+                    
+                    var out = "";
+                    // each내용은 기본 관광지호출과 유사
+                    $(items).each(function (i, j) {
+                        var img = j.firstimage;
+                        if (!('firstimage' in j)) {
+                            img = "img/logo.png";
+                        }
+                        
+                        if (getCookie(j.contenttypeid + "_" + j.contentid)) {
+                            var heart = "img/iconHeartFill.png";
+                        }
+                        else {
+                            heart = "img/iconHeartEmpty.png";
+                        }
+                        
+                        out += "<div class='sightsContainer'>";
+                        out += "<div class='sightsImage' style='background-image: url(" + img + ");'>";
+                        out += "<div class='like' id='" + language + "_" + j.contenttypeid + "_" + j.contentid + "' onclick='likeClicked(this);' style='background-image: url(" + heart + ");'></div>";
+                        out += "<a href='infoKorea_detail.html?language=" + language + "&contenttypeid=" + j.contenttypeid + "&contentid=" + j.contentid + "' target='_self'><div class='forAtag' >";
+                        out += "<div class='titleAndView'><span class='title'>" + j.title + "</span><span class='sightsCount glyphicon glyphicon-eye-open'> " + (new Intl.NumberFormat().format(j.readcount)) + "</span></div>";
+                        out += "</div></a></div>";
+                        out += "</div>";
+                    });
+                    $('.sightsList').html(out);
+                }
+                , error: function (req) {
+                    alert('상태: ' + req.status + ", " + req.responseText + ", error : " + req.error);
+                }
+            });
+        }
+
+        // 즐겨찾기 버튼 클릭 시 호출되는 함수
+        function likeClicked(item) {
+            var cookievalue = item.id; // 쿠키내용
+            var cookieid = cookievalue.split('_')[1] + "_" + cookievalue.split('_')[2]; // 쿠키id : 관광타입 + 관광지id
+            var checkCookie = getCookie(cookieid);
+            // 쿠키가 있으면 쿠키삭제
+            if (checkCookie != null) {
+                delCookie(cookieid);
+                $(item).css('background-image', 'url("img/iconHeartEmpty.png")');
+            }
+            else { // 쿠키가 없으면 쿠키저장
+                saveCookie(cookieid, cookievalue, 18000);
+                $(item).css('background-image', "url('img/iconHeartFill.png')");
+            }
+        }
+
+        function saveCookie(cookieName, cookieValue, expireDays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (expireDays * 24 * 60 * 60 * 1000));
+            var expires = 'expires=' + d.toUTCString();
+            document.cookie = cookieName + "=" + cookieValue + ";" + expires + "; path=/";
+        }
+
+        function getCookie(cookieName) {
+            var name = cookieName + "=";
+            var subCook = document.cookie.split(';');
+            for (var i = 0; i < subCook.length; i++) {
+                if (subCook[i].indexOf(name) >= 0) {
+                    var findVal = subCook[i].split('=')[1]; // 쿠키내용
+                    return findVal;
+                }
+            }
+        }
+
+        function delCookie(cookieName) {
+            saveCookie(cookieName, "", 0);
+        }
+        
+        // 쿠키 내용을 객체 속성으로 배열에 저장
+        function hateCookies() {
+            if(document.cookie != ''){
+                var cookie = document.cookie.split(';');
+                var cookies = new Array();
+                for (var i = 0; i < cookie.length; i++) {
+                    var hateVal = cookie[i].split('=')[1]; // 쿠키 내용
+//                    console.log(hateVal);
+                    var cookiesObj = {
+                        language: hateVal.split('_')[0]
+                        , contenttypeid: hateVal.split('_')[1]
+                        , contentid: hateVal.split('_')[2]
+                    };
+                    cookies.push(cookiesObj);
+                }
+                return cookies; // 쿠키배열 리턴
+            }
+        }
+        
+        // 쿠키 배열을 호출해서 페이지로드
+        function calledCookies(cookieArr) {
+            var cookieArr = cookieArr;
+            if (cookieArr != null){
+                for (var i = 0; i < cookieArr.length; i++) {
+                    likeItSearch(cookieArr[i]);
+                }
+            }
+        }
+        
+        // 즐겨찾기한 관광지 출력
+        function likeItSearch(cookieObj) {
+            page = 1;
+            totalPage = 0;
+            flagMore = false;
+            prevNext = 0;
+            $('.paging').css('display', 'none');
+            $('body').animate({scrollTop: 0}, 400);
+            if(cookieObj.contentid != null){
+                var cookieUrl = "http://api.visitkorea.or.kr/openapi/service/rest/" + cookieObj.language + "/detailCommon?ServiceKey=" + apiKey + "&MobileOS=ETC&MobileApp=AppTesting" + "&contentId=" + cookieObj.contentid + "&contentTypeId=" + cookieObj.contenttypeid + "&_type=json&defaultYN=Y&firstImageYN=Y&areacodeYN=Y&catcodeYN=Y";
+
+                likeit = "";
+                $.ajax({
+                    url: cookieUrl
+                    , type: 'get'
+                    , jsonp: 'callback'
+                    , success: function (data) {
+                        var item = data.response.body.items.item;
+                        var img = item.firstimage;
+                        if (!('firstimage' in item)) {
+                            img = "img/logo.png";
+                        }
+
+                        likeit += "<div class='sightsContainer'>";
+                        likeit += "<div class='sightsImage' style='background-image: url(" + img + ");'>";
+                        likeit += "<div class='like' id='" + cookieObj.language + "_" + cookieObj.contenttypeid + "_" + cookieObj.contentid + "' onclick='likeClicked(this);' style='background-image:url(img/iconHeartFill.png)'></div>";
+                        likeit += "<a href='infoKorea_detail.html?language=" + cookieObj.language + "&contenttypeid=" + cookieObj.contenttypeid + "&contentid=" + cookieObj.contentid + "' target='_self'><div class='forAtag' >";
+                        likeit += "<div class='titleAndView'><span class='title' style='width: 100%;'>" + item.title + "</span></div>";
+                        likeit += "</div></a></div>";
+                        likeit += "</div>";
+                        $('.sightsList').html(likeit);
+                    }
+                    , error: function (req) {
+                        alert('상태: ' + req.status + ", " + req.responseText + ", error : " + req.error);
+                    }
+                });
+            } else {
+                $('.sightsList').html("<div class='sightsContainer' id='noItem'>No Result</div>");
+            }
+        }
+
+        // 로딩 함수
+        function myFunction() {
+            setTimeout(function () {
+                $('#loading').css('display', 'none');
+            }, 2000);
+            setTimeout(function () {
+                $('.wrapWidth').css('display', 'block');
+            }, 2000);
+        }
+    </script>
+</head>
+
+<body>
+<!--    페이지 로딩 전 이미지 -->
+    <div id="loading">
+        <div class="sk-folding-cube">
+            <div class="sk-cube1 sk-cube"></div>
+            <div class="sk-cube2 sk-cube"></div>
+            <div class="sk-cube4 sk-cube"></div>
+            <div class="sk-cube3 sk-cube"></div>
+        </div>
+    </div>
+    
+<!--    헤더 로고 -->
+    <div class="headerLogo">
+        <div id="logo" onclick="location.href='infoKorea_main.html'"></div>
+    </div>
+    
+    <!--    출력리스트 -->
+    <div class="wrap wrapWidth">
+        <div class="container containerWidth">
+            
+            <div class="sightsList"> </div>
+            <div class="paging"></div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title"><div id="modalLogo"></div></h4>
+                </div>
+                <div class="modal-body">
+                  <p class="bg-danger" style="background-color:white; font-size: 1.5vw;">No saved siteseeings!</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+    
+<!--    네비게이션 버튼 -->
+    <div class="navBtn" id="backBtn"></div>
+    <div class="navBtn" id="likeBtn"></div>
+    <div class="navBtn" id="keywordBtn"></div>
+    <div class="navBtn" id="menuBtn"></div>
+</body>
+
+</html>

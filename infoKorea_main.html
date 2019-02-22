@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>info Korea - main</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <meta name="keywords" content="">
+    <!-- facebook -->
+    <meta property="fb:app_id" content="394068590973816" />
+    <meta id="facebookTITLE" property="og:title" content="infoKorea"/>
+    <meta id="facebookURL" property="og:url" content="http://ing9321.dothome.co.kr/infoKorea_detail.html"/>
+    <meta id="facebookDEC" property="og:description" content="Welcome to Korea"/>
+    <meta id="facebookIMG" property="og:image" content="http://ing9321.dothome.co.kr/img/shareThumbnail.jpg"/>
+    <meta property="og:type" content="website" />
+    <meta property="og:image:width" content="600" />
+	<meta property="og:image:height" content="315" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <!-- swiper css-->
+    <link rel="stylesheet" href="css/swiper.css">
+    <!--swiper jquary-->
+    <script src="js/swiper.jquery.js"></script>
+    <!--bootstrap jquary-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--bootstrap css-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="shortcut icon" href="img/destination.png">
+    <script type="text/javascript">
+        /* 폰트*/
+        WebFontConfig = {
+            custom: {
+                families: ['Nanum Gothic']
+                , urls: ['http://fonts.googleapis.com/earlyaccess/nanumgothic.css']
+            }
+        };
+        (function () {
+            var wf = document.createElement('script');
+            wf.src = ('https:' == document.location.protocol ? 'https' : 'http') + '://ajax.googleapis.com/ajax/libs/webfont/1.4.10/webfont.js';
+            wf.type = 'text/javascript';
+            wf.async = 'true';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(wf, s);
+        })();
+    </script>
+    <script>
+        languageService = "";
+        placeService = "";
+        selectedContentTypeId = "";
+        languageArr = "";
+        $(window).ready(function () {
+            $('.sqaure').height($('.sqaure').width());
+            $('#logo').height($('#logo').width());
+            $('#language').click(function () {
+                $('#language').css('backgroundColor', '#D5E5CF');
+                $('#langSwiper').css('z-index', '1');
+            });
+            $('#areaCode').click(function () {
+                $('#areaCode').css('backgroundColor', '#D5E5CF');
+                $('#placeSwiper').css('z-index', '1');
+            });
+            $('body').click(function(e){
+//                console.log(e.target.id);
+                if(e.target.id == "language" || e.target.id == "langText"){
+                    $('#areaCode').css('backgroundColor', '#272727');
+//                    $('#placeSwiper').css('z-index', '-99');
+                } else if(e.target.id == "areaCode" || e.target.id == "areaText"){
+                    $('#language').css('backgroundColor', '#272727');
+//                    $('#langSwiper').css('z-index', '-99');
+                } else{
+                    $('#language').css('backgroundColor', '#272727');
+//                    $('#langSwiper').css('z-index', '-99');
+                    $('#areaCode').css('backgroundColor', '#272727');
+//                    $('#placeSwiper').css('z-index', '-99');
+                }
+            });
+            //Initialize Swiper
+            var swiper = new Swiper('.swiper-container', {
+                pagination: '.swiper-pagination'
+                , paginationClickable: true
+                , direction: 'vertical'
+                , slidesPerView: 4
+                , paginationType: 'progress'
+                , scrollbar: '.swiper-scrollbar'
+                , scrollbarHide: true
+                , centeredSlides: true
+                , grabCursor: true
+                , mousewheelControl: true
+                , slidesPerGroup: 2
+            });
+            
+            if (parseInt($(window).width()) < 801) {
+                $('.wrapWidth').removeClass('wrap');
+                $('.containerWidth').removeClass('container');
+                $('.bg-danger').css('font-size', '4vw');
+            }
+            $(window).resize(function () {
+                if (parseInt($(window).width()) < 801) {
+                    $('.wrapWidth').removeClass('wrap');
+                    $('.containerWidth').removeClass('container');
+                    $('.bg-danger').css('font-size', '4vw');
+                }
+                else if (parseInt($(window).width()) > 800) {
+                    $('.wrapWidth').addClass('wrap');
+                    $('.containerWidth').addClass('container');
+                    $('.bg-danger').css('font-size', '1.5vw');
+                }
+                $('.sqaure').height($('.sqaure').width());
+                $('#logo').height($('#logo').width());
+            });
+            // nav
+            var btnFlag = false;
+            $('#menuBtn').click(function () {
+                if (!btnFlag) {
+                    $('#likeBtn').animate({
+                        bottom: '105px'
+                    }, 300);
+                    $('#keywordBtn').animate({
+                        bottom: '55px'
+                    }, 300);
+                    btnFlag = true;
+                }
+                else {
+                    $('.navBtn').animate({
+                        bottom: '5px'
+                    }, 300);
+                    btnFlag = false;
+                }
+            });
+            $('#likeBtn').click(function () {
+                window.location = "infoKorea_searchList.html?favorite=Y";
+            });
+            $('#keywordBtn').click(function () {
+                if(languageService != ''){
+                    window.location = "infoKorea_keywordSearch.html?language=" + languageService;
+                } else {
+                    window.location = "infoKorea_keywordSearch.html?language=KorService";
+                }
+            });
+        });
+
+        function langugeSelect(service, id) {
+            console.log(service);
+            $('.slideLan').css('color','white');
+            $('#language').css('backgroundColor', '#272727');
+            id.style.color='#AF8B9A';
+            languageService = service;
+            languageParse();
+        }
+
+        function placeSelect(servicePla,idd) {
+            console.log(servicePla);
+            $('.slidePlace').css('color','white');
+            $('#areaCode').css('backgroundColor', '#272727');
+            idd.style.color='#AF8B9A';
+//            $('#placeSwiper').css('z-index', '1');
+            placeService = servicePla;
+        }
+
+        function info() {
+            $('#contentInfo').css('backgroundColor', '#D5E5CF');
+            if (languageService == 'KorService') {
+                selectedContentTypeId = 12;
+            }
+            else {
+                selectedContentTypeId = 76;
+            }
+            if (languageService != "" && placeService != "") {
+                window.location = "infoKorea_searchList.html?language=" + languageService + "&areaCode=" + placeService + "&contentTypeId=" + selectedContentTypeId;
+            }
+            else {
+                setTimeout(function () {
+                    $('#contentInfo').css('backgroundColor', '#272727')
+                }, 200);
+                $('#myModal').modal();
+            }
+        }
+
+        function inn() {
+            $('#contentInn').css('backgroundColor', '#D5E5CF');
+            if (languageService == 'KorService') {
+                selectedContentTypeId = 32;
+            }
+            else {
+                selectedContentTypeId = 80;
+            }
+            if (languageService != "" && placeService != "") {
+                window.location = "infoKorea_searchList.html?language=" + languageService + "&areaCode=" + placeService + "&contentTypeId=" + selectedContentTypeId;
+                console.log(languageService);
+            }
+            else {
+                setTimeout(function () {
+                    $('#contentInn').css('backgroundColor', '#272727')
+                }, 200);
+                $('#myModal').modal();
+            }
+        }
+
+        function course() {
+            $('#contentCourse').css('backgroundColor', '#D5E5CF');
+            if(languageService == "" || placeService == ""){
+                setTimeout(function () {
+                    $('#contentCourse').css('backgroundColor', '#272727')
+                }, 200);
+                $('#myModal').modal();
+            } else if(languageService == 'KorService'){
+                selectedContentTypeId = 25;
+                window.location = "infoKorea_searchList.html?language=" + languageService + "&areaCode=" + placeService + "&contentTypeId=" + selectedContentTypeId;
+            } else {
+                setTimeout(function () {
+                    $('#contentCourse').css('backgroundColor', '#272727')
+                }, 200);
+                $('#myModalTwo').modal();
+            }
+        }
+
+        function festival() {
+            $('#contentFestival').css('backgroundColor', '#D5E5CF');
+            if (languageService == 'KorService') {
+                selectedContentTypeId = 15;
+            }
+            else {
+                selectedContentTypeId = 85;
+            }
+            if (languageService != "" && placeService != "") {
+                window.location = "infoKorea_searchList.html?language=" + languageService + "&areaCode=" + placeService + "&contentTypeId=" + selectedContentTypeId;
+                console.log(languageService);
+            }
+            else {
+                setTimeout(function () {
+                    $('#contentFestival').css('backgroundColor', '#272727')
+                }, 200);
+                $('#myModal').modal();
+            }
+        }
+        // language json파싱 메소드
+        function languageParse() {
+            $.ajax({
+                url: "json/selectLanguage.json"
+                , type: 'get'
+                , jsonp: 'callback'
+                , success: function (data) {
+                    //                    console.log("data success");
+                    //                    console.log(data);
+                    languageSave(data);
+                }
+                , error: function (req) {
+                    alert('상태: ' + req.status + ", " + req.responseText + ", error : " + req.error);
+                }
+            });
+        }
+        // language 저장
+        function languageSave(data) {
+            console.log(data);
+            if (languageService == "KorService") languageArr = data.KorService;
+            else if (languageService == "EngService") languageArr = data.EngService;
+            else if (languageService == "JpnService") languageArr = data.JpnService;
+            else if (languageService == "ChsService") languageArr = data.ChsService;
+            else if (languageService == "ChtService") languageArr = data.ChtService;
+            else if (languageService == "GerService") languageArr = data.GerService;
+            else if (languageService == "FreService") languageArr = data.FreService;
+            else if (languageService == "SpnService") languageArr = data.SpnService;
+            else if (languageService == "RusService") languageArr = data.RusService;
+            console.log(languageArr);
+            languageSet();
+        }
+        // language 변화
+        function languageSet(){
+            // 지역
+            languageChange('02.', '0', '#areaCode');
+            languageChange('03.', '1', '#contentInfo');
+            languageChange('04.', '2', '#contentInn');
+            languageChange('05.', '3', '#contentCourse');
+            languageChange('06.', '4', '#contentFestival');
+//            console.log($('#placeSwiper')[0].children[0].children[0].children[0]);
+            for(var i=5; i<22; i++){
+                $('#placeSwiper')[0].children[0].children[0].children[i-5].textContent = languageArr[i];
+            }
+//            console.log($("#languageError").text());
+//            console.log(languageArr[22]);
+            $("#languageError").text(languageArr[22]);
+            $("#ServiceError").text(languageArr[23]);
+        }
+        
+        function languageChange(no, index, target){
+            out = no;
+            out += "<br/><br/>";
+            out += languageArr[index];
+            $(target)[0].children[0].innerHTML = out;
+        }
+    </script>
+    <style>
+        #logo {
+            width: 30%;
+            background-image: url('img/logo.png');
+            background-position: center;
+            background-size: cover;
+            margin: auto;
+            margin-top: -7%;
+        }
+        
+        .sqaure {
+            position: relative;
+            width: 50%;
+            background-color: #272727;
+            float: left;
+        }
+        
+        .textStyle {
+            color: white;
+            font-family: "Nanum Gothic", sans-serif;
+            font-size: 3vw;
+            margin-left: 10%;
+            /*            margin-top: 35%;*/
+            position: absolute;
+            top: 50%;
+            transform: translate(0%, -50%);
+            cursor: pointer;
+        }
+        #language, #areaCode, #contentInfo, #contentInn, #contentCourse, #contentFestival {
+            cursor: pointer;
+        }
+        
+        .divImg {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+        }
+        /*        swiper style */
+        
+        .swiper-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .swiper-slide {
+            text-align: center;
+            font-size: 3vw;
+            color: white;
+            /* Center slide text vertically */
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            -webkit-align-items: center;
+            align-items: center;
+        }
+        
+        .swiperStyle {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            overflow: hidden;
+        }
+        
+        #langSwiper {
+            z-index: -99;
+        }
+        
+        #placeSwiper {
+            z-index: -99;
+        }
+        
+        #modalLogo {
+            background-image: url(img/LOGOmodal.png);
+            width: 181px;
+            height: 30px;
+            background-position: center;
+            background-size: cover;
+        }
+        
+        /*  네비게이션 버튼*/
+        .navBtn {
+            width: 48px;
+            height: 48px;
+            border-radius: 35px;
+            position: fixed;
+            right: 5px;
+            bottom: 5px;
+            background-position: center;
+            background-size: cover;
+            z-index: 2;
+        }
+        #menuBtn {
+            background-image: url('img/iconMenu.png');
+        }
+        #likeBtn {
+            background-image: url('img/iconHeart.png');
+        }
+        #keywordBtn {
+            background-image: url('img/iconSearch.png');
+        }
+    </style>
+</head>
+
+<body>
+    <div class="headerLogo">
+        <div id="logo" onclick="location.href='infoKorea_main.html'"></div>
+    </div>
+    <div class="wrap wrapWidth">
+        <div class="container containerWidth">
+            <div id="language" class="sqaure">
+                <div id="langText" class="textStyle">01.
+                    <br />
+                    <br />Language</div>
+            </div>
+            <div class="sqaure">
+                <div id="langSwiper" class="swiperStyle">
+                    <!-- Swiper -->
+                    <div class="swiper-container">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide slideLan" onclick="langugeSelect('KorService',this)">한국어</div>
+                            <div class="swiper-slide slideLan" onclick="langugeSelect('EngService',this)">English</div>
+                            <div class="swiper-slide slideLan" onclick="langugeSelect('JpnService',this)">日本語</div>
+                            <div class="swiper-slide slideLan" onclick="langugeSelect('ChsService',this)">中國語(簡體字)</div>
+                            <div class="swiper-slide slideLan" onclick="langugeSelect('ChtService',this)">中國語(正體字)</div>
+                            <div class="swiper-slide slideLan" onclick="langugeSelect('GerService',this)">Deutsch</div>
+                            <div class="swiper-slide slideLan" onclick="langugeSelect('FreService',this)">français</div>
+                            <div class="swiper-slide slideLan" onclick="langugeSelect('SpnService',this)">español</div>
+                            <div class="swiper-slide slideLan" onclick="langugeSelect('RusService',this)">русский</div>
+                        </div>
+                        <!--
+                 Add Pagination 
+                <div class="swiper-pagination"></div>
+-->
+                        <!-- If we need scrollbar -->
+                        <div class="swiper-scrollbar"></div>
+                    </div>
+                </div>
+                <div class="divImg" style="background-image:url('img/nam.jpg')"> </div>
+            </div>
+            <div id="areaCode" class="sqaure">
+                <div id="areaText" class="textStyle">02.
+                    <br />
+                    <br />지역</div>
+            </div>
+            <div class="sqaure">
+                <div id="placeSwiper" class="swiperStyle">
+                    <!-- Swiper -->
+                    <div class="swiper-container">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('1',this)">서울</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('2',this)">인천</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('3',this)">대전</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('4',this)">대구</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('5',this)">광주</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('6',this)">부산</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('7',this)">울산</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('8',this)">세종시</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('31',this)">경기도</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('32',this)">강원도</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('33',this)">충청북도</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('34',this)">충청남도</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('35',this)">경상북도</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('36',this)">경상남도</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('37',this)">전라북도</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('38',this)">전라남도</div>
+                            <div class="swiper-slide slidePlace" onclick="placeSelect('39',this)">제주도</div>
+                        </div>
+                        <!--
+                 Add Pagination 
+                <div class="swiper-pagination"></div>
+-->
+                        <!-- If we need scrollbar -->
+                        <div class="swiper-scrollbar"></div>
+                    </div>
+                </div>
+                <div class="divImg" style="background-image:url('img/pohang.jpg')"></div>
+            </div>
+            <div id="contentInfo" class="sqaure" onclick="info();">
+                <div class="textStyle">03.
+                    <br />
+                    <br />관광정보</div>
+            </div>
+            <div id="contentInn" class="sqaure" onclick="inn();">
+                <div class="textStyle">04.
+                    <br />
+                    <br />숙소</div>
+            </div>
+            <div id="contentCourse" class="sqaure" onclick="course();">
+                <div class="textStyle">05.
+                    <br />
+                    <br />코스추천</div>
+            </div>
+            <div id="contentFestival" class="sqaure" onclick="festival();">
+                <div class="textStyle">06.
+                    <br />
+                    <br />축제추천</div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"><div id="modalLogo"></div></h4> </div>
+                <div class="modal-body">
+                    <p id="languageError" class="bg-danger" style="background-color:white; font-size: 1.5vw;">언어와 지역을 선택해 주세요.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!--course 모달-->
+    <div id="myModalTwo" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title"><div id="modalLogo"></div></h4>
+          </div>
+          <div class="modal-body">
+            <p id="ServiceError" class="bg-danger" style="background-color:white; font-size: 1.5vw;">서비스 지원이 되지 않습니다.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" >Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!--    nav     -->
+    <div class="navBtn" id="likeBtn"></div>
+    <div class="navBtn" id="keywordBtn"></div>
+    <div class="navBtn" id="menuBtn"></div>
+    
+</body>
+
+</html>

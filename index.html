@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>info Korea</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <!-- facebook -->
+    <meta property="fb:app_id" content="394068590973816" />
+    <meta id="facebookTITLE" property="og:title" content="infoKorea"/>
+    <meta id="facebookURL" property="og:url" content="http://ing9321.dothome.co.kr/infoKorea_detail.html"/>
+    <meta id="facebookDEC" property="og:description" content="Welcome to Korea"/>
+    <meta id="facebookIMG" property="og:image" content="http://ing9321.dothome.co.kr/img/shareThumbnail.jpg"/>
+    <meta property="og:type" content="website" />
+    <meta property="og:image:width" content="600" />
+	<meta property="og:image:height" content="315" />
+<!--    <meta http-equiv="refresh" content="; url=http://ing9321.dothome.co.kr/index.html"></meta>-->
+    <style>
+        body{
+            padding: 0;
+            margin: 0;
+        }
+        #webImg{
+            width: 100%;
+        }
+        #buttStyle{
+            background-color: #E6F4E1;
+            border: none;
+            color: gray;
+            width: 50px;
+            height: 30px;
+            border-radius: 6px;
+        }
+        #chkBox{
+            width: 300px;
+            margin: auto;
+            margin-bottom: 100px;
+            
+        }
+    </style>
+    <script>
+        function saveCookie(cookieName, cookieValue, expireDays) {
+                var d= new Date(); // 쿠키 생성 시 만료일 설정
+                d.setTime(d.getTime() + (18250*24*60*60*1000));
+                        // utc time + (하루*24시간*60분*60초*1000ms=ms단위)
+//                alert(d);
+//                alert(d.toUTCString()); // 세계표준시 기준으로 변환, string 타입
+                var expires = 'expires=' + d.toUTCString();
+                // 실제 쿠키 저장
+                document.cookie = cookieName + "=" + cookieValue + ";" + expires + "; path=/";
+                                // 쿠키네임=쿠키값;만료일; 저장될경로=/
+            }
+
+            function closeWin(){
+                //체크박스에 체크가 되어 있다면.. 쿠키 저장하고 창 닫기
+                if(document.getElementById('chkAgree').checked){
+                    //쿠키 저장
+    //                alert('쿠키저장');
+                    saveCookie('chk','true',18250)
+                }
+
+                
+                location.href='http://sophieing.cafe24.com/info_korea/infoKorea_main.html';
+                
+            }
+    </script>
+</head>
+<body>
+    <img src="img/explain.png" id="webImg">
+    <div id="chkBox">
+        <input type="checkbox" id="chkAgree"/>[다시 보지 않음]
+        <input type="button" id="buttStyle" value="닫기" onclick="closeWin();"/>
+    </div>
+</body>
+</html>
